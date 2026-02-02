@@ -8,14 +8,15 @@ A modern, production-ready React boilerplate with all the essential tools and li
 - ⚛️ **React 19** - Latest React with TypeScript
 - 🎨 **Tailwind CSS** - Utility-first CSS framework
 - 🎯 **MynaUI Icons** - Beautiful icon library
-- 🐻 **Zustand** - Lightweight state management (with persistence)
+- 🐻 **Zustand** - Lightweight state management with persistence
 - 🌍 **react-i18next** - Internationalization support (EN, AR)
 - 🔀 **React Router** - Language-aware routing with /ar prefix
 - 📦 **Path Aliases** - Clean imports with `@/` prefix
 - 🌗 **Dark Mode** - Built-in theme switching
 - 🧩 **Component Library** - Pre-built UI components
-- 🔄 **Cross-Tab Sync** - State synchronized across multiple tabs
+- 🔄 **Configurable Cross-Tab Sync** - Selective state synchronization with whitelist
 - 🌐 **RTL Support** - Right-to-left layout for Arabic
+- 🏗️ **Feature-Based Architecture** - Scalable folder structure aligned with pages
 
 ## 🗺️ Routes
 
@@ -51,24 +52,37 @@ npm run build
 
 ```
 src/
-├── components/         # Reusable components
-│   ├── ui/            # Base UI components (Button, Card, etc.)
-│   ├── Counter.tsx    # Example counter component
-│   ├── LanguageSwitcher.tsx # Language switcher with routing
-│   ├── Layout.tsx     # App layout
-│   └── ThemeToggle.tsx
-├── pages/             # Page components
+├── components/         # Shared UI components
+│   └── ui/            # Base UI components (Button, Card, etc.)
+├── features/          # Feature-based modules (aligned with pages)
+│   ├── common/        # Shared features across pages
+│   │   ├── language/  # Language switcher
+│   │   └── theme/     # Theme toggle
+│   ├── home/          # Home page features
+│   │   └── Counter.tsx
+│   └── login/         # Login page features (ready for expansion)
+├── layouts/           # Layout components
+│   └── Layout.tsx     # Main app layout with header/footer
+├── pages/             # Route pages
 │   ├── Home.tsx       # Home page
 │   └── Login.tsx      # Login page
 ├── store/             # Zustand stores
-│   └── useAppStore.ts
+│   └── useAppStore.ts # Global state with configurable sync
 ├── i18n/              # Internationalization
-│   └── config.ts
+│   ├── config.ts      # i18next configuration
+│   └── locales/       # Translation files (in public/locales)
 ├── lib/               # Utility functions
-│   └── utils.ts
-├── App.tsx            # Router setup
+│   └── utils.ts       # cn() and other utilities
+├── App.tsx            # Router setup with language sync
 └── main.tsx           # App entry point
 ```
+
+### Feature-Based Architecture
+
+The project follows a scalable feature-based structure:
+- **features/common/** - Shared features like theme and language
+- **features/[page]/** - Page-specific features aligned with pages/
+- This structure scales well as the app grows
 
 ## 🎨 Tech Stack
 
@@ -83,27 +97,46 @@ src/
 
 ## 🧩 Components
 
-The boilerplate includes pre-built UI components:
+The boilerplate includes pre-built components organized by type:
 
-- `Button` - Customizable button with variants
-- `Card` - Card component with header, content, and footer
-- `Counter` - Example component with Zustand integration
-- `LanguageSwitcher` - Switch between languages
-- `ThemeToggle` - Toggle between light and dark modes
+### UI Components (`components/ui/`)
+- `Button` - Customizable button with variants (default, outline, ghost)
+- `Card` - Card component with header, content, and footer sections
+
+### Feature Components
+- **Common Features** (`features/common/`)
+  - `LanguageSwitcher` - Switch between languages with route navigation
+  - `ThemeToggle` - Toggle between light and dark modes
+- **Home Features** (`features/home/`)
+  - `Counter` - Example component with Zustand integration
+
+### Layouts (`layouts/`)
+- `Layout` - Main app layout with header, footer, and RTL support
+
+All components are fully typed with TypeScript and styled with Tailwind CSS.
 
 ## 🌍 Internationalization
 
 Languages supported:
-- English (en)
-- Arabic (ar) with RTL support
+- **English (en)** - Default language
+- **Arabic (ar)** - With RTL support
 
-The app automatically switches to RTL layout when Arabic is selected. State is synchronized across multiple browser tabs.
+Translation files are located in `public/locales/{lang}/translation.json`.
 
-Add more languages in `src/i18n/config.ts`
+The app automatically:
+- Switches to RTL layout when Arabic is selected
+- Updates routes with `/ar` prefix for Arabic
+- Syncs language preference across browser tabs
+- Persists language selection
+
+Add more languages by:
+1. Creating a new folder in `public/locales/`
+2. Adding translations to `translation.json`
+3. Updating language options in `LanguageSwitcher.tsx`
 
 ## 🐻 State Management
 
-Using Zustand with persistence and cross-tab synchronization:
+Using Zustand with localStorage persistence and configurable cross-tab synchronization:
 
 ```typescript
 import { useAppStore } from '@/store/useAppStore';
@@ -115,7 +148,25 @@ function MyComponent() {
 }
 ```
 
-State changes are automatically synced across all open tabs in real-time.
+### Cross-Tab Sync Configuration
+
+Only whitelisted state keys sync across tabs to prevent performance issues:
+
+```typescript
+// In src/store/useAppStore.ts
+const SYNC_WHITELIST: (keyof AppState)[] = ['theme', 'language'];
+```
+
+**What syncs:** User preferences (theme, language)  
+**What doesn't sync:** Frequently changing data (count, large objects)
+
+Benefits:
+- ✅ Performance-optimized with selective sync
+- ✅ Prevents circular update loops
+- ✅ Easy to configure via whitelist
+- ✅ All state persists in localStorage
+
+See [CROSS_TAB_SYNC.md](CROSS_TAB_SYNC.md) for detailed documentation.
 
 ## 🎨 Styling
 
@@ -127,6 +178,15 @@ Using Tailwind CSS with custom design tokens:
 </div>
 ```
 
+Dark mode is implemented using CSS variables that automatically switch based on the `theme` state.
+
+## 📚 Documentation
+
+- [GETTING_STARTED.md](GETTING_STARTED.md) - Detailed setup and usage guide
+- [CONFIGURATION.md](CONFIGURATION.md) - Configuration options
+- [EXAMPLES.md](EXAMPLES.md) - Code examples and patterns
+- [CROSS_TAB_SYNC.md](CROSS_TAB_SYNC.md) - Cross-tab synchronization guide
+
 ## 📝 License
 
 MIT
@@ -135,29 +195,10 @@ MIT
 
 Contributions are welcome! Feel free to open issues or submit pull requests.
 
+## 🔗 Repository
+
+[https://github.com/ygg-ahammed/shadcn-react-boilerplate](https://github.com/ygg-ahammed/shadcn-react-boilerplate)
+
 ---
 
 Built with ❤️ using React, Vite, and modern web technologies
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
